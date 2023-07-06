@@ -1,65 +1,99 @@
+# -*- coding: utf-8 -*-
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QFormLayout, QGroupBox, QHBoxLayout, QMessageBox, QDateEdit
+from PyQt6.QtWidgets import QApplication, QDateEdit, QMessageBox, QComboBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
 
-class VentanaAcompanantes(QMainWindow):
+
+class VentanaAcompanante(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Agregar Acompañantes")
+        self.setWindowTitle("Ventana de Acompañantes")
+        self.setGeometry(100, 100, 500, 200)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        # Etiquetas
+        self.texto_label = QLabel("A continuación ingrese los datos del o la acompañante:") 
+        self.nombre_label = QLabel("Nombre:")
+        self.apellido_label = QLabel("Apellido:")
+        self.rut_label = QLabel("Rut:")
+        self.nacimiento_label = QLabel("Fecha de Nacimiento:")
+        self.telefono_label = QLabel("Telefono:")
+        self.nro_emer_label = QLabel("Número de Emergencia:")
 
-        self.layout = QVBoxLayout()
-        self.central_widget.setLayout(self.layout)
+        # Campos de entrada de texto
+        self.nombre_lineedit = QLineEdit()
+        self.apellido_lineedit = QLineEdit()
+        self.rut_lineedit = QLineEdit()
+        self.nacimiento_dateedit = QDateEdit()
+        self.telefono_lineedit = QLineEdit()
+        self.nro_emer_lineedit = QLineEdit()
 
-        self.groupBox = QGroupBox("Datos del Acompañante")
-        self.formLayout = QFormLayout()
+        # Botones
+        self.boton_volver = QPushButton("Volver")
+        self.agregar_boton = QPushButton("Agregar Acompañante")
+        self.agregar_boton.clicked.connect(self.agregar_acompanante)
 
-        self.nombreLineEdit = QLineEdit()
-        self.apellidoLineEdit = QLineEdit()
-        self.rutLineEdit = QLineEdit()
-        self.fechaNacimientoDateEdit = QDateEdit()
-        self.telefonoLineEdit = QLineEdit()
-        self.emailLineEdit = QLineEdit()
+        # Grupo para la columna izquierda
+        grupo_izquierda = QGroupBox()
+        izquierda_layout = QFormLayout()
+        izquierda_layout.addRow(self.nombre_label, self.nombre_lineedit)
+        izquierda_layout.addRow(self.apellido_label, self.apellido_lineedit)
+        izquierda_layout.addRow(self.rut_label, self.rut_lineedit)
+        grupo_izquierda.setLayout(izquierda_layout)
 
-        self.formLayout.addRow(QLabel("Nombre:"), self.nombreLineEdit)
-        self.formLayout.addRow(QLabel("Apellido:"), self.apellidoLineEdit)
-        self.formLayout.addRow(QLabel("RUT:"), self.rutLineEdit)
-        self.formLayout.addRow(QLabel("Fecha de Nacimiento:"), self.fechaNacimientoDateEdit)
-        self.formLayout.addRow(QLabel("Teléfono:"), self.telefonoLineEdit)
-        self.formLayout.addRow(QLabel("E-mail:"), self.emailLineEdit)
+        # Grupo para la columna derecha
+        grupo_derecha = QGroupBox()
+        derecha_layout = QFormLayout()
+        derecha_layout.addRow(self.nacimiento_label, self.nacimiento_dateedit)
+        derecha_layout.addRow(self.telefono_label, self.telefono_lineedit)
+        derecha_layout.addRow(self.nro_emer_label, self.nro_emer_lineedit)
+        grupo_derecha.setLayout(derecha_layout)
 
-        self.groupBox.setLayout(self.formLayout)
-        self.layout.addWidget(self.groupBox)
+        # QHBoxLayout para combinar los grupos izquierdo y derecho
+        layout_principal = QHBoxLayout()
+        layout_principal.addWidget(grupo_izquierda)
+        layout_principal.addWidget(grupo_derecha)
 
-        self.agregarAcompananteButton = QPushButton("Agregar Acompañante")
-        self.agregarAcompananteButton.clicked.connect(self.agregar_acompanante)
-        self.layout.addWidget(self.agregarAcompananteButton)
+        # QHBoxLayout para los botones inferiores
+        layout_botones = QHBoxLayout()
+        layout_botones.addWidget(self.boton_volver)
+        layout_botones.addWidget(self.agregar_boton)
+
+        # QVBoxLayout para combinar el diseño principal con los botones inferiores
+        layout_vertical = QVBoxLayout()
+        layout_vertical.addWidget(self.texto_label)
+        layout_vertical.addLayout(layout_principal)
+        layout_vertical.addLayout(layout_botones)
+
+        # Widget contenedor y establecer el diseño principal
+        widget = QWidget()
+        widget.setLayout(layout_vertical)
+        self.setCentralWidget(widget)
 
     def agregar_acompanante(self):
-        nombre = self.nombreLineEdit.text()
-        apellido = self.apellidoLineEdit.text()
-        rut = self.rutLineEdit.text()
-        fecha_nacimiento = self.fechaNacimientoDateEdit.date().toString("yyyy-MM-dd")
-        telefono = self.telefonoLineEdit.text()
-        email = self.emailLineEdit.text()
+        nombre = self.nombre_lineedit.text()
+        apellido = self.apellido_lineedit.text()
+        rut = self.rut_lineedit.text()
+        fecha_nacimiento = self.nacimiento_dateedit.date().toString("yyyy-MM-dd")
+        telefono = self.telefono_lineedit.text()
+        nro_emer = self.nro_emer_lineedit.text()
 
-        # Aqui supongo q hay hacer la cosa pa q se guarden en un csv idk
+        # Code for saving the data to a CSV is missing here
 
         QMessageBox.information(self, "Éxito", "Acompañante agregado correctamente.")
 
-        # Pa limpiar los campos 
-        self.nombreLineEdit.clear()
-        self.apellidoLineEdit.clear()
-        self.rutLineEdit.clear()
-        self.telefonoLineEdit.clear()
-        self.emailLineEdit.clear()
+        # Code to clear the fields
+        self.nombre_lineedit.clear()
+        self.apellido_lineedit.clear()
+        self.rut_lineedit.clear()
+        self.nacimiento_dateedit.clear()
+        self.telefono_lineedit.clear()
+        self.nro_emer_lineedit.clear()
 
-        self.nombreLineEdit.setFocus()
+        self.nombre_lineedit.setFocus()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ventana = VentanaAcompanantes()
-    ventana.show()
+    window = VentanaAcompanante()
+    window.show()
     sys.exit(app.exec())
