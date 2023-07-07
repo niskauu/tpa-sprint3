@@ -1,6 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QComboBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
-
+from PyQt6.QtWidgets import QApplication, QComboBox, QMessageBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
 
 class VentanaPagos(QMainWindow):
     def __init__(self):
@@ -75,14 +74,42 @@ class VentanaPagos(QMainWindow):
     def realizar_pago(self):
         nombre = self.nombre_lineedit.text()
         apellido = self.apellido_lineedit.text()
-        id_cliente = self.rut_lineedit.text()
+        rut_cliente = self.rut_lineedit.text()
         forma_pago = self.tipo_pago_combobox.currentText()
         numero_tarjeta = self.nro_tarjeta_lineedit.text()
         cvc = self.cvc_lineedit.text()
 
+        if not (nombre and apellido and rut_cliente and numero_tarjeta and cvc):
+            QMessageBox.warning(self, "Advertencia", "Debe rellenar todos los campos.")
+            return
 
-if __name__ == "__main__":
+        respuesta = QMessageBox.question(
+            self,
+            "Verificación",
+            "Verifique que todos sus datos estén correctos antes de realizar el pago.",
+            QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+        )
+
+        if respuesta == QMessageBox.StandardButton.Yes:
+            QMessageBox.information(self, "Confirmación", "El pago ha sido confirmado y la reserva se ha realizado con éxito.")
+            respuesta_final = QMessageBox.question(
+                self,
+                "Volver al inicio",
+                "¿Desea volver al inicio?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Close,
+            )
+
+            if respuesta_final == QMessageBox.StandardButton.Yes:
+                from FormulariodeReserva import Reserva
+                self.ventana_reserva = Reserva()
+                self.ventana_reserva.show()
+                self.hide()
+
+            else:
+                self.close()
+
+'''if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = VentanaPagos()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec())'''

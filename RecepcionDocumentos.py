@@ -1,7 +1,7 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QLabel, QTextEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox, QMainWindow, QLabel, QTextEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
 
-class MainWindow(QMainWindow):
+class Documentos(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -54,11 +54,11 @@ Para ello, debe aceptar las siguientes condiciones:''')
         layout_vertical.addLayout(layout_botones)
 
         volver = QPushButton("Volver")
-        volver.clicked.connect(self.volver_button_clicked)
+        volver.clicked.connect(self.volver_presionado)
         layout_botones.addWidget(volver)
 
         continuar = QPushButton("Continuar")
-        continuar.clicked.connect(self.continue_button_clicked)
+        continuar.clicked.connect(self.continuar_presionado)
         layout_botones.addWidget(continuar)
 
     def adjuntar_archivos(self):
@@ -66,17 +66,35 @@ Para ello, debe aceptar las siguientes condiciones:''')
         if archivos:
             self.doc_archivos.setText("\n".join(archivos))
 
-    def continue_button_clicked(self):
-        if self.checkbox.isChecked():
-            print("jijiji")
+    def continuar_presionado(self):
+        from VentanadePago import VentanaPagos
+
+        archivos_adjuntados = bool(self.doc_archivos.toPlainText())
+        terminos_aceptados = self.checkbox.isChecked()
+
+        if archivos_adjuntados or terminos_aceptados:
+            if archivos_adjuntados and terminos_aceptados:
+                QMessageBox.warning(self, "Advertencia", "No puede adjuntar archivos y aceptar los términos al mismo tiempo.")
+            else:
+                self.ventana_pagos = VentanaPagos()
+                self.ventana_pagos.show()
+                self.hide()
         else:
-            print("acepta las weas primero")
+            QMessageBox.warning(
+                self,
+                "Advertencia",
+                "Antes de continuar debe adjuntar sus archivos o aceptar los términos para presentar los documentos presencialmente.",
+                QMessageBox.StandardButton.Ok,
+            )
 
-    def volver_button_clicked(self):
-        print("Volver")
+    def volver_presionado(self):
+        from TipodeExcursion import VentanaExcursion
+        self.ventana_excursion = VentanaExcursion()
+        self.ventana_excursion.show()
+        self.hide()
 
-if __name__ == '__main__':
+'''if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = Documentos()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec())'''

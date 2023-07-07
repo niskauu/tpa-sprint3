@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QRadioButton, QPushButton, QTextEdit, QGroupBox, QButtonGroup
+from PyQt6.QtWidgets import QApplication, QMessageBox, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QRadioButton, QPushButton, QTextEdit, QGroupBox, QButtonGroup
 from PyQt6.QtGui import QPixmap
 
 class VentanaExcursion(QMainWindow):
@@ -15,10 +15,10 @@ class VentanaExcursion(QMainWindow):
         self.grupo_botones = QButtonGroup() 
 
         # Excursión Light
-        light_box = QGroupBox("Excursión Light")
+        light_box = QGroupBox("Opción 1:")
         light_layout = QVBoxLayout()
 
-        light_radio = QRadioButton()
+        light_radio = QRadioButton("Excursión Light")
         light_layout.addWidget(light_radio)
         self.grupo_botones.addButton(light_radio)
 
@@ -42,10 +42,10 @@ class VentanaExcursion(QMainWindow):
         layout_horizontal.addWidget(light_box)
 
         # Excursión Plus
-        plus_box = QGroupBox("Excursión Plus")
+        plus_box = QGroupBox("Opción 2:")
         plus_layout = QVBoxLayout()
 
-        plus_radio = QRadioButton()
+        plus_radio = QRadioButton("Excursión Plus")
         plus_layout.addWidget(plus_radio)
         self.grupo_botones.addButton(plus_radio)
 
@@ -69,10 +69,10 @@ class VentanaExcursion(QMainWindow):
         layout_horizontal.addWidget(plus_box)
 
         # Excursión Heavy
-        heavy_box = QGroupBox("Excursión Heavy")
+        heavy_box = QGroupBox("Opción 3:")
         heavy_layout = QVBoxLayout()
 
-        heavy_radio = QRadioButton()
+        heavy_radio = QRadioButton("Excursión Heavy")
         heavy_layout.addWidget(heavy_radio)
         self.grupo_botones.addButton(heavy_radio)
 
@@ -119,19 +119,39 @@ Las actividades requieren de capacidades físicas compatibles con la complejidad
         volver_boton.clicked.connect(self.volver_clicked)
 
     def continuar_clicked(self):
+        from RecepcionDocumentos import Documentos
+        from VentanadePago import VentanaPagos
         opcion_excursion = self.grupo_botones.checkedButton()
+
         if opcion_excursion is not None:
-            print("Excursión seleccionada:", opcion_excursion.text())
+            if opcion_excursion.text() == "Excursión Plus" or opcion_excursion.text() == "Excursión Heavy":
+                self.ventana_documentos = Documentos()
+                self.ventana_documentos.show()
+                self.hide()
+            elif opcion_excursion.text() == "Excursión Light":
+                respuesta = QMessageBox.question(self, "Advertencia", "Para realizar la reserva debe abonar un 50% del valor total. ¿Desea continuar?",
+                                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+                if respuesta == QMessageBox.StandardButton.Yes:
+                    self.ventana_pagos = VentanaPagos()
+                    self.ventana_pagos.show()
+                    self.hide()
         else:
-            print("No se ha seleccionado ninguna excursión.")
+            QMessageBox.warning(
+                self,
+                "Advertencia",
+                "Antes de continuar debe seleccionar una excursión",
+                QMessageBox.StandardButton.Ok,
+            )
 
     def volver_clicked(self):
-        print("Botón Volver presionado.")
+        from FormulariodeReserva import Reserva
+        self.ventana_reserva = Reserva()
+        self.ventana_reserva.show()
+        self.hide()
 
-
-if __name__ == "__main__":
+'''if __name__ == "__main__":
     app = QApplication(sys.argv)
     ventana = VentanaExcursion()
     ventana.show()
-    sys.exit(app.exec())
-
+    sys.exit(app.exec())'''

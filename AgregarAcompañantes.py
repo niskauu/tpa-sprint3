@@ -2,7 +2,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QDateEdit, QMessageBox, QComboBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
 
-
 class VentanaAcompanante(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -29,6 +28,7 @@ class VentanaAcompanante(QMainWindow):
 
         # Botones
         self.boton_volver = QPushButton("Volver")
+        self.boton_volver.clicked.connect(self.volver)
         self.agregar_boton = QPushButton("Agregar Acompañante")
         self.agregar_boton.clicked.connect(self.agregar_acompanante)
 
@@ -77,11 +77,9 @@ class VentanaAcompanante(QMainWindow):
         telefono = self.telefono_lineedit.text()
         nro_emer = self.nro_emer_lineedit.text()
 
-        # Code for saving the data to a CSV is missing here
-
         QMessageBox.information(self, "Éxito", "Acompañante agregado correctamente.")
 
-        # Code to clear the fields
+        # Pa limpiar los camposs
         self.nombre_lineedit.clear()
         self.apellido_lineedit.clear()
         self.rut_lineedit.clear()
@@ -91,9 +89,11 @@ class VentanaAcompanante(QMainWindow):
 
         self.nombre_lineedit.setFocus()
 
+    def volver(self):
+        self.hide()
 
-if __name__ == "__main__":
+'''if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = VentanaAcompanante()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec())'''

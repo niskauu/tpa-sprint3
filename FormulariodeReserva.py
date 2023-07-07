@@ -75,8 +75,13 @@ class Reserva(QWidget):
 
         #boton
         boton = QPushButton()
-        boton.setText("Agregar Reserva")
+        boton.setText("Continuar")
         boton.clicked.connect(self.guardar_reserva)
+
+        # Agregar botón "Agregar Acompañante"
+        boton_agregar_acompanante = QPushButton()
+        boton_agregar_acompanante.setText("Agregar Acompañante")
+        boton_agregar_acompanante.clicked.connect(self.mostrar_ventana_acompanante)
 
         #layouts
         layout_main = QVBoxLayout()
@@ -118,14 +123,21 @@ class Reserva(QWidget):
         layout_main.addLayout(layouts)
         layout_main.addWidget(fecha_inicio_widget)
         layout_main.addWidget(boton)
+        layout_main.addWidget(boton_agregar_acompanante)
 
         self.setLayout(layout_main)
 
     def func_aux(self):
         return True
+    
+    def mostrar_ventana_acompanante(self):
+        from AgregarAcompañantes import VentanaAcompanante
+        self.ventana_acompanante = VentanaAcompanante()
+        self.ventana_acompanante.show()
+
     #guarda datos
     def guardar_reserva(self):
-
+        from TipodeExcursion import VentanaExcursion
         if self.nombre_input.isModified() == True and self.apellido_input.isModified() == True and self.rut_input.isModified() == True and self.telefono_input.isModified() == True and self.email_input.isModified() == True:
             #guardar
             archivo = open("Dataset/reserva.csv", "a")
@@ -134,9 +146,14 @@ class Reserva(QWidget):
             datos = f"{self.nombre_input.text()},{self.apellido_input.text()},{self.rut_input.text()},{self.fecha_nacimiento.text()},{self.telefono_input.text()},{self.email_input.text()},{fecha_inicio_temp.strftime('%d-%m-%Y')}\n"
             archivo.write(datos)
             archivo.close()
+
+            self.ventana_excursion = VentanaExcursion()
+            self.ventana_excursion.show()
+            self.hide()
         else:
             QMessageBox.warning(self,"Error", "No puede dejar campos vacios", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
-# if __name__ == "__main__":    
-#     app = QApplication(sys.argv)
-#     iniciar = Reserva()
-#     sys.exit(app.exec())
+
+'''if __name__ == "__main__":    
+    app = QApplication(sys.argv)
+    iniciar = Reserva()
+    sys.exit(app.exec())'''
