@@ -1,6 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QLineEdit, QPushButton, QMessageBox, QLabel
 from PyQt6.QtGui import QFont
+import os
 
 class IniciarSesion(QWidget):
     def __init__(self):
@@ -73,7 +74,7 @@ class IniciarSesion(QWidget):
         intento = f"{self.correo_input.text()},{self.contrasenia_input.text()}"
         autorizado = False
         try:
-            with open("Dataset/usuarios.csv", "r") as archivo_usuarios:
+            with open(f"{os.path.dirname(__file__)}/Dataset/usuarios.csv", "r") as archivo_usuarios:
                 for linea in archivo_usuarios:
                     if linea.strip() == intento:
                         autorizado = True

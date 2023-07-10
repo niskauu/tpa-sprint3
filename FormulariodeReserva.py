@@ -3,11 +3,13 @@ from PyQt6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget, QLi
 from PyQt6.QtGui import QFont
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+import os
 
 class Reserva(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.num_reserva = 0
         self.iniciarUI()
     
     def iniciarUI(self):
@@ -76,12 +78,7 @@ class Reserva(QWidget):
         #boton
         boton = QPushButton()
         boton.setText("Continuar")
-        boton.clicked.connect(self.guardar_reserva)
-
-        # Agregar botón "Agregar Acompañante"
-        boton_agregar_acompanante = QPushButton()
-        boton_agregar_acompanante.setText("Agregar Acompañante")
-        boton_agregar_acompanante.clicked.connect(self.mostrar_ventana_acompanante)
+        boton.clicked.connect(self.seguro)
 
         #layouts
         layout_main = QVBoxLayout()
@@ -123,33 +120,59 @@ class Reserva(QWidget):
         layout_main.addLayout(layouts)
         layout_main.addWidget(fecha_inicio_widget)
         layout_main.addWidget(boton)
-        layout_main.addWidget(boton_agregar_acompanante)
 
         self.setLayout(layout_main)
 
+    def seguro(self):
+        consulta = QMessageBox.information(self, "Pregunta", "¿Desea continuar?\nNo podrá modificar datos", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if consulta == QMessageBox.StandardButton.Yes:
+            self.consultar_acompanantes()
+        elif consulta == QMessageBox.StandardButton.No:
+            self.close()
+
     def func_aux(self):
         return True
+
+    def consultar_acompanantes(self):
+        consulta = QMessageBox.information(self, "Pregunta", "¿Desea agregar acompañantes?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if consulta == QMessageBox.StandardButton.Yes:
+            self.guardar_reserva()
+            self.mostrar_ventana_acompanante()
+        elif consulta == QMessageBox.StandardButton.No:
+            self.guardar_reserva()
+            self.abrir_ventana_excursion()
     
     def mostrar_ventana_acompanante(self):
         from AgregarAcompañantes import VentanaAcompanante
-        self.ventana_acompanante = VentanaAcompanante()
+        self.ventana_acompanante = VentanaAcompanante(self.num_reserva)
         self.ventana_acompanante.show()
+        self.hide()
 
+    def abrir_ventana_excursion(self):
+        from TipodeExcursion import VentanaExcursion
+        self.ventana_excursion = VentanaExcursion(self.num_reserva)
+        self.ventana_excursion.show()
+        self.hide()
+        
     #guarda datos
     def guardar_reserva(self):
-        from TipodeExcursion import VentanaExcursion
-        if self.nombre_input.isModified() == True and self.apellido_input.isModified() == True and self.rut_input.isModified() == True and self.telefono_input.isModified() == True and self.email_input.isModified() == True:
+        if self.nombre_input.isModified() == True and self.apellido_input.isModified() == True and self.rut_input.isModified() == True and self.telefono_input.isModified() == True and self.email_input.isModified() == True:            
+
             #guardar
-            archivo = open("Dataset/reserva.csv", "a")
+            archivo = open(f"{os.path.dirname(__file__)}/Dataset/reserva.csv", "a")
             fecha_inicio_temp = self.fecha_inicio.selectedDate().toPyDate()
             
-            datos = f"{self.nombre_input.text()},{self.apellido_input.text()},{self.rut_input.text()},{self.fecha_nacimiento.text()},{self.telefono_input.text()},{self.email_input.text()},{fecha_inicio_temp.strftime('%d-%m-%Y')}\n"
+            #numero reserva
+            with open(f"{os.path.dirname(__file__)}/Dataset/reserva.csv", "r") as archivo1:
+                for linea in archivo1:
+                    if linea.strip() != "":
+                        self.num_reserva = self.num_reserva+1
+
+            #reserva
+            datos = f"{self.num_reserva},{self.nombre_input.text()},{self.apellido_input.text()},{self.rut_input.text()},{self.fecha_nacimiento.text()},{self.telefono_input.text()},{self.email_input.text()},{fecha_inicio_temp.strftime('%d-%m-%Y')}\n"
             archivo.write(datos)
             archivo.close()
-
-            self.ventana_excursion = VentanaExcursion()
-            self.ventana_excursion.show()
-            self.hide()
+  
         else:
             QMessageBox.warning(self,"Error", "No puede dejar campos vacios", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
 

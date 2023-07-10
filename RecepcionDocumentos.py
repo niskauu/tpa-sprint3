@@ -2,8 +2,10 @@ import sys
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox, QMainWindow, QLabel, QTextEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
 
 class Documentos(QMainWindow):
-    def __init__(self):
+    def __init__(self, nro_reserva, nro_acompanantes):
         super().__init__()
+        self.nro_reserva = nro_reserva
+        self.nro_acompanantes = nro_acompanantes
 
         self.setWindowTitle("Ventana de Documentos")
         self.setGeometry(100, 100, 600, 500)
@@ -52,10 +54,6 @@ Para ello, debe aceptar las siguientes condiciones:''')
 
         layout_botones = QHBoxLayout()
         layout_vertical.addLayout(layout_botones)
-
-        volver = QPushButton("Volver")
-        volver.clicked.connect(self.volver_presionado)
-        layout_botones.addWidget(volver)
 
         continuar = QPushButton("Continuar")
         continuar.clicked.connect(self.continuar_presionado)

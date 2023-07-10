@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
 import sys
 from PyQt6.QtWidgets import QApplication, QDateEdit, QMessageBox, QComboBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
+import os
 
 class VentanaAcompanante(QMainWindow):
-    def __init__(self):
+    def __init__(self,nro_reserva):
         super().__init__()
+        self.nro_acompanantes=0
+        self.nro_reserva = nro_reserva
 
         self.setWindowTitle("Ventana de Acompañantes")
         self.setGeometry(100, 100, 500, 200)
@@ -27,8 +29,8 @@ class VentanaAcompanante(QMainWindow):
         self.nro_emer_lineedit = QLineEdit()
 
         # Botones
-        self.boton_volver = QPushButton("Volver")
-        self.boton_volver.clicked.connect(self.volver)
+        self.boton_continuar = QPushButton("Continuar")
+        self.boton_continuar.clicked.connect(self.seguro)
         self.agregar_boton = QPushButton("Agregar Acompañante")
         self.agregar_boton.clicked.connect(self.agregar_acompanante)
 
@@ -55,7 +57,7 @@ class VentanaAcompanante(QMainWindow):
 
         # QHBoxLayout para los botones inferiores
         layout_botones = QHBoxLayout()
-        layout_botones.addWidget(self.boton_volver)
+        layout_botones.addWidget(self.boton_continuar)
         layout_botones.addWidget(self.agregar_boton)
 
         # QVBoxLayout para combinar el diseño principal con los botones inferiores
@@ -73,23 +75,42 @@ class VentanaAcompanante(QMainWindow):
         nombre = self.nombre_lineedit.text()
         apellido = self.apellido_lineedit.text()
         rut = self.rut_lineedit.text()
-        fecha_nacimiento = self.nacimiento_dateedit.date().toString("yyyy-MM-dd")
+        fecha_nacimiento = self.nacimiento_dateedit.date().toString("dd-MM-yyyy")
         telefono = self.telefono_lineedit.text()
         nro_emer = self.nro_emer_lineedit.text()
 
-        QMessageBox.information(self, "Éxito", "Acompañante agregado correctamente.")
+        if nombre and apellido and rut and fecha_nacimiento and telefono and nro_emer:
+            self.nro_acompanantes =+1
+            archivo = open(f"{os.path.dirname(__file__)}/Dataset/reserva.csv", "a")
+            datos = f"{self.nro_reserva},{nombre},{apellido},{rut},{fecha_nacimiento},{telefono},{nro_emer}"
+            archivo.write(datos)
+            archivo.close()
 
-        # Pa limpiar los camposs
-        self.nombre_lineedit.clear()
-        self.apellido_lineedit.clear()
-        self.rut_lineedit.clear()
-        self.nacimiento_dateedit.clear()
-        self.telefono_lineedit.clear()
-        self.nro_emer_lineedit.clear()
+            QMessageBox.information(self, "Éxito", "Acompañante agregado correctamente.")
+            # para limpiar los campos
+            self.nombre_lineedit.clear()
+            self.apellido_lineedit.clear()
+            self.rut_lineedit.clear()
+            self.nacimiento_dateedit.clear()
+            self.telefono_lineedit.clear()
+            self.nro_emer_lineedit.clear()
 
-        self.nombre_lineedit.setFocus()
+            self.nombre_lineedit.setFocus()
+        
+        else:
+            QMessageBox.warning(self,"Error", "No puede dejar campos vacios", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
 
-    def volver(self):
+    def seguro(self):
+        consulta = QMessageBox.information(self, "Pregunta", "¿Desea continuar? No podrá agregar más acompañantes", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if consulta == QMessageBox.StandardButton.Yes:
+            self.abrir_ventana_excursion()
+        elif consulta == QMessageBox.StandardButton.No:
+            return
+
+    def abrir_ventana_excursion(self):
+        from TipodeExcursion import VentanaExcursion
+        self.ventana_excursion = VentanaExcursion(self.nro_reserva, self.nro_acompanantes)
+        self.ventana_excursion.show()
         self.hide()
 
 '''if __name__ == "__main__":
