@@ -1,20 +1,19 @@
 import sys
+import csv
 from PyQt6.QtWidgets import QApplication, QComboBox, QMessageBox, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QFormLayout, QGroupBox
-import os
 
 class VentanaPagos(QMainWindow):
-    def __init__(self,nro_reserva,nro_acompanantes, precio, opcion):
+    def __init__(self, numero_reserva):
         super().__init__()
-        self.nro_reserva = nro_reserva
-        self.nro_acompanantes = nro_acompanantes
-        self.pago = round(precio/2, 0)
-        self.opcion = opcion
 
         self.setWindowTitle("Ventana de Pagos")
         self.setGeometry(100, 100, 500, 200)
+
+        self.numero_reserva = numero_reserva
         
         # Etiquetas
-        self.total_label = QLabel(f"Total a pagar: {self.precio}")
+        self.total_label = QLabel()  # Etiqueta para mostrar el total a pagar
+        self.total_label.setText(f"Total a pagar: ${self.calcular_total_pagar()}")
         self.nombre_label = QLabel("Nombre:")
         self.apellido_label = QLabel("Apellido:")
         self.rut_label = QLabel("Rut:")
@@ -35,6 +34,7 @@ class VentanaPagos(QMainWindow):
         self.tipo_pago_combobox.addItem("Crédito")
 
         # Botones
+        #self.volver_button = QPushButton("Volver")
         self.pago_boton = QPushButton("Realizar Pago")
         self.pago_boton.clicked.connect(self.realizar_pago)
 
@@ -61,6 +61,7 @@ class VentanaPagos(QMainWindow):
 
         # QHBoxLayout para los botones inferiores
         botones_layout = QHBoxLayout()
+        #botones_layout.addWidget(self.volver_button)
         botones_layout.addWidget(self.pago_boton)
 
         # QVBoxLayout para combinar el diseño principal con los botones inferiores
@@ -73,6 +74,31 @@ class VentanaPagos(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout_vertical)
         self.setCentralWidget(widget)
+
+    def calcular_total_pagar(self):
+        with open("Dataset/acompañantes.csv", "r", encoding="iso-8859-1") as file:
+            reader = csv.reader(file)
+            conteo_acompañantes = sum(1 for row in reader if row[0] == self.numero_reserva)
+        print("conteo_acompañantes:", conteo_acompañantes)
+
+        with open("Dataset/tipoexcursion.csv", "r", encoding="iso-8859-1") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if row[0] == self.numero_reserva:
+                    tipo_excursion = row[1]
+                    break
+        print("tipo_excursion:", tipo_excursion)
+
+        monto_pagar = 0
+        if tipo_excursion == "Excursion Light":
+            monto_pagar = (conteo_acompañantes + 1) * 5000
+        elif tipo_excursion == "Excursion Plus":
+            monto_pagar = (conteo_acompañantes + 1) * 25000
+        elif tipo_excursion == "Excursion Heavy":
+            monto_pagar = (conteo_acompañantes + 1) * 50000
+        print("monto_pagar:", monto_pagar)
+
+        return monto_pagar
 
     def realizar_pago(self):
         nombre = self.nombre_lineedit.text()
@@ -94,17 +120,21 @@ class VentanaPagos(QMainWindow):
         )
 
         if respuesta == QMessageBox.StandardButton.Yes:
-            
-            archivo = open(f"{os.path.dirname(__file__)}/Dataset/pagos.csv", "a")
+            datos_pago = [
+                self.calcular_total_pagar(),
+                nombre,
+                apellido,
+                rut_cliente,
+                forma_pago,
+                numero_tarjeta,
+                cvc
+            ]
 
-            datos = f"{self.num_reserva},{nombre},{apellido},{rut_cliente},{forma_pago},{numero_tarjeta},{cvc}\n"
-            archivo.write(datos)
-            archivo.close()
+            with open("Dataset/registrodepagos.csv", "a", encoding="utf-8-sig", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(datos_pago)
 
             QMessageBox.information(self, "Confirmación", "El pago ha sido confirmado y la reserva se ha realizado con éxito.")
-
-        if self.opcion == 1:
-######repetir en ventana recepcion docs # para los de las otras opciones regresar al inicio
             respuesta_final = QMessageBox.question(
                 self,
                 "Volver al inicio",
@@ -120,20 +150,9 @@ class VentanaPagos(QMainWindow):
 
             else:
                 self.close()
-        
-        elif self.opcion == 2 or self.opcion==3:
-            self.mostrar_ventana_docs()
 
-    
-    def mostrar_ventana_docs(self):
-        from RecepcionDocumentos import Documentos
-        self.ventana_docs = Documentos(self.nro_reserva,self.nro_acompanantes)
-        self.ventana_docs.show()
-        self.hide()
-        
-
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = VentanaPagos()
     window.show()
-    sys.exit(app.exec())'''
+    sys.exit(app.exec())

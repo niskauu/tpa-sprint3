@@ -2,13 +2,13 @@ import sys
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox, QMainWindow, QLabel, QTextEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
 
 class Documentos(QMainWindow):
-    def __init__(self, nro_reserva, nro_acompanantes):
+    def __init__(self, numero_reserva):
         super().__init__()
-        self.nro_reserva = nro_reserva
-        self.nro_acompanantes = nro_acompanantes
 
         self.setWindowTitle("Ventana de Documentos")
         self.setGeometry(100, 100, 600, 500)
+
+        self.numero_reserva = numero_reserva
 
         # Widget principal para el diseño vertical
         widget = QWidget(self)
@@ -55,6 +55,10 @@ Para ello, debe aceptar las siguientes condiciones:''')
         layout_botones = QHBoxLayout()
         layout_vertical.addLayout(layout_botones)
 
+        volver = QPushButton("Volver")
+        volver.clicked.connect(self.volver_presionado)
+        layout_botones.addWidget(volver)
+
         continuar = QPushButton("Continuar")
         continuar.clicked.connect(self.continuar_presionado)
         layout_botones.addWidget(continuar)
@@ -74,7 +78,7 @@ Para ello, debe aceptar las siguientes condiciones:''')
             if archivos_adjuntados and terminos_aceptados:
                 QMessageBox.warning(self, "Advertencia", "No puede adjuntar archivos y aceptar los términos al mismo tiempo.")
             else:
-                self.ventana_pagos = VentanaPagos()
+                self.ventana_pagos = VentanaPagos(self.numero_reserva)
                 self.ventana_pagos.show()
                 self.hide()
         else:
@@ -91,8 +95,8 @@ Para ello, debe aceptar las siguientes condiciones:''')
         self.ventana_excursion.show()
         self.hide()
 
-'''if __name__ == '__main__':
+if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Documentos()
     window.show()
-    sys.exit(app.exec())'''
+    sys.exit(app.exec())

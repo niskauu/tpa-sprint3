@@ -1,7 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QLineEdit, QPushButton, QMessageBox, QLabel
 from PyQt6.QtGui import QFont
-import os
 
 class IniciarSesion(QWidget):
     def __init__(self):
@@ -74,7 +73,7 @@ class IniciarSesion(QWidget):
         intento = f"{self.correo_input.text()},{self.contrasenia_input.text()}"
         autorizado = False
         try:
-            with open(f"{os.path.dirname(__file__)}/Dataset/usuarios.csv", "r") as archivo_usuarios:
+            with open("Dataset/usuarios.csv", "r") as archivo_usuarios:
                 for linea in archivo_usuarios:
                     if linea.strip() == intento:
                         autorizado = True
@@ -93,6 +92,7 @@ class IniciarSesion(QWidget):
         from FormulariodeReserva import Reserva
         self.abrir_ventana = Reserva()
         self.abrir_ventana.show()
+        self.hide()
 
     def abrir_ventana_registro(self):
         from RegistrodeUsuario import VentanaRegistro

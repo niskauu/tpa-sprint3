@@ -1,18 +1,18 @@
-import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QRadioButton, QPushButton, QTextEdit, QGroupBox, QButtonGroup
 from PyQt6.QtGui import QPixmap
-import os
+import sys
+import csv
+import codecs
+import io
 
 class VentanaExcursion(QMainWindow):
-    def __init__(self,nro_reserva,nro_acompanantes=0):
+    def __init__(self, numero_reserva):
         super().__init__()
-        self.nro_reserva = nro_reserva
-        self.nro_acompanantes = nro_acompanantes
-        self.precio = 0
-        self.opcion = None
+        self.numero_reserva = numero_reserva
 
         self.setWindowTitle("Selección de Excursión")
         self.setGeometry(100, 100, 800, 500)
+
         contenedor_principal = QVBoxLayout()
 
         layout_horizontal = QHBoxLayout()
@@ -23,12 +23,12 @@ class VentanaExcursion(QMainWindow):
         light_box = QGroupBox("Opción 1:")
         light_layout = QVBoxLayout()
 
-        light_radio = QRadioButton("Excursión Light")
+        light_radio = QRadioButton("Excursion Light")
         light_layout.addWidget(light_radio)
         self.grupo_botones.addButton(light_radio)
 
         light_imagen = QLabel()
-        light_pixmap = QPixmap(f"{os.path.dirname(__file__)}/images/excursion_light.png")
+        light_pixmap = QPixmap("images/excursion_light.png")
         light_imagen.setPixmap(light_pixmap)
         light_imagen.setScaledContents(True)
         light_imagen.setFixedSize(250, 150)
@@ -50,12 +50,12 @@ class VentanaExcursion(QMainWindow):
         plus_box = QGroupBox("Opción 2:")
         plus_layout = QVBoxLayout()
 
-        plus_radio = QRadioButton("Excursión Plus")
+        plus_radio = QRadioButton("Excursion Plus")
         plus_layout.addWidget(plus_radio)
         self.grupo_botones.addButton(plus_radio)
 
         plus_imagen = QLabel()
-        plus_pixmap = QPixmap(f"{os.path.dirname(__file__)}/images/excursion_plus.png")
+        plus_pixmap = QPixmap("images/excursion_plus.png")
         plus_imagen.setPixmap(plus_pixmap)
         plus_imagen.setScaledContents(True)
         plus_imagen.setFixedSize(250, 150)
@@ -77,12 +77,12 @@ class VentanaExcursion(QMainWindow):
         heavy_box = QGroupBox("Opción 3:")
         heavy_layout = QVBoxLayout()
 
-        heavy_radio = QRadioButton("Excursión Heavy")
+        heavy_radio = QRadioButton("Excursion Heavy")
         heavy_layout.addWidget(heavy_radio)
         self.grupo_botones.addButton(heavy_radio)
 
         heavy_imagen = QLabel()
-        heavy_pixmap = QPixmap(f"{os.path.dirname(__file__)}/images/excursion_heavy.png")
+        heavy_pixmap = QPixmap("images/excursion_heavy.png")
         heavy_imagen.setPixmap(heavy_pixmap)
         heavy_imagen.setScaledContents(True)
         heavy_imagen.setFixedSize(250, 150)
@@ -105,9 +105,9 @@ Las actividades requieren de capacidades físicas compatibles con la complejidad
         contenedor_principal.addLayout(layout_horizontal)  # Agregar layout en el contenedor principal
 
         botones_layout = QHBoxLayout()
-        
-        # volver_boton = QPushButton("Volver")
-        # botones_layout.addWidget(volver_boton)
+
+        volver_boton = QPushButton("Volver")
+        botones_layout.addWidget(volver_boton)
 
         continuar_button = QPushButton("Continuar")
         botones_layout.addWidget(continuar_button)
@@ -120,40 +120,49 @@ Las actividades requieren de capacidades físicas compatibles con la complejidad
 
         self.setCentralWidget(widget)
 
-        continuar_button.clicked.connect(self.continuar_clicked())
+        continuar_button.clicked.connect(self.continuar_clicked)
+        volver_boton.clicked.connect(self.volver_clicked)
 
     def continuar_clicked(self):
+        from RecepcionDocumentos import Documentos
         from VentanadePago import VentanaPagos
         opcion_excursion = self.grupo_botones.checkedButton()
 
         if opcion_excursion is not None:
-            if opcion_excursion.text() == "Excursión Plus" or opcion_excursion.text() == "Excursión Heavy":
-                aviso = QMessageBox.question(self, "Advertencia", "Para estas excursiones debe poseer:\n1.- Constancia médica\n2.- Declaración jurada\n3.- Anexos (electrocardiogramas, radiografías y/o tomografías).\n¿Desea continuar?",
-                                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                if aviso == QMessageBox.standardButton.No:
-                    return
+            tipo_excursion = opcion_excursion.text()
 
-            #definir precio total y guardar tipo excursion
-            if opcion_excursion.text() == "Excursión Light":
-                self.precio=(self.nro_acompanantes+1)*10000
-                self.opcion = 1
+            # Convertir el texto al formato adecuado
+            tipo_excursion = tipo_excursion.encode("utf-8").decode("utf-8")
 
-            elif opcion_excursion.text() == "Excursión Plus":
-                self.precio=(self.nro_acompanantes+1)*50000
-                self.opcion = 2
-            
-            elif opcion_excursion.text() == "Excursión Plus":
-                self.precio=(self.nro_acompanantes+1)*100000
-                self.opcion = 3
+            # Save data to CSV file
+            data = [self.numero_reserva, tipo_excursion]
+            with io.open("Dataset/tipoexcursion.csv", "a", encoding="utf-8-sig", newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(data)
 
-            respuesta = QMessageBox.question(self, "Advertencia", f"Para realizar la reserva debe abonar un 50% del valor total siguiente: ${self.precio}. ¿Desea continuar?",
-                                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if opcion_excursion.text() == "Excursion Plus" or opcion_excursion.text() == "Excursion Heavy":
+                respuesta = QMessageBox.question(
+                    self, 
+                    "Advertencia", 
+                    "Para estas excursiones debe poseer:\n1.- Constancia médica\n2.- Declaración jurada\n3.- Anexos (electrocardiogramas, radiografías y/o tomografías).\n¿Desea continuar?", 
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                if respuesta == QMessageBox.StandardButton.Yes:
+                    self.ventana_documentos = Documentos(self.numero_reserva)
+                    self.ventana_documentos.show()
+                    self.hide()
+            elif opcion_excursion.text() == "Excursion Light":
+                respuesta = QMessageBox.question(
+                    self, 
+                    "Advertencia", 
+                    "Para realizar la reserva debe abonar un 50% del valor total. ¿Desea continuar?", 
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
 
-            if respuesta == QMessageBox.StandardButton.Yes:
-                self.ventana_pagos = VentanaPagos(self.nro_reserva,self.nro_acompanantes,self.precio, self.opcion)
-                self.ventana_pagos.show()
-                self.hide()
-
+                if respuesta == QMessageBox.StandardButton.Yes:
+                    self.ventana_pagos = VentanaPagos(self.numero_reserva)
+                    self.ventana_pagos.show()
+                    self.hide()
         else:
             QMessageBox.warning(
                 self,
@@ -162,8 +171,14 @@ Las actividades requieren de capacidades físicas compatibles con la complejidad
                 QMessageBox.StandardButton.Ok,
             )
 
-'''if __name__ == "__main__":
+    def volver_clicked(self):
+        from FormulariodeReserva import Reserva
+        self.ventana_reserva = Reserva()
+        self.ventana_reserva.show()
+        self.hide()
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ventana = VentanaExcursion()
     ventana.show()
-    sys.exit(app.exec())'''
+    sys.exit(app.exec())
